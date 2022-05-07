@@ -2,6 +2,8 @@
  * Hackathon SO: LogMemCacher
  * (c) 2020-2021, Operating Systems
  */
+
+#define _GNU_SOURCE 1
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -33,7 +35,6 @@ char *lmc_logfile_path;
 static int
 lmc_client_function(SOCKET client_sock)
 {
-	int rc;
 	struct lmc_client *client;
 
 	client = lmc_create_client(client_sock);
@@ -166,7 +167,12 @@ lmc_add_log_os(struct lmc_client *client, struct lmc_client_logline *log)
 int
 lmc_flush_os(struct lmc_client *client)
 {
-	return 0;
+	struct lmc_cache *cache = client->cache;	
+	int ret = msync(cache->ptr, cache->bytes_written, MS_SYNC);
+	if(ret == -1){
+		perror("error syncronizing with log file");
+		exit(-1);
+	}
 }
 
 /**
@@ -182,5 +188,15 @@ lmc_flush_os(struct lmc_client *client)
 int
 lmc_unsubscribe_os(struct lmc_client *client)
 {
-	return 0;
+	struct lmc_cache *cache = client->cache;
+	lmc_flush_os(client);
+	int ret = munmap(cache->ptr, cache->bytes_written);
+	if(ret < 0){
+		perror("error unmapping");
+		exit(-1);
+	}
+	free(cache->service_name);
+	free(cache);
+	close(client->client_sock);
+	free(client);
 }
