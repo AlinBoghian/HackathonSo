@@ -153,7 +153,7 @@ lmc_init_client_cache(struct lmc_cache *cache)
 int
 lmc_add_log_os(struct lmc_client *client, struct lmc_client_logline *log)
 {
-	int pages_needed = ceil((float)((strlen(log->logline)+client->cache->bytes_written)/sysconf(_SC_PAGE_SIZE)));
+	int pages_needed = ceil((float)((sizeof(struct lmc_client_logline)+client->cache->bytes_written)/sysconf(_SC_PAGE_SIZE)));
 	
 	struct lmc_cache cache_scris;
 	void *noua_adresa;
@@ -161,8 +161,9 @@ lmc_add_log_os(struct lmc_client *client, struct lmc_client_logline *log)
 		noua_adresa = mremap(client->cache->ptr, cache_scris.bytes_written, pages_needed, MREMAP_MAYMOVE);
 	}
 	client->cache->ptr = noua_adresa;
-	strcpy(noua_adresa + client->cache->bytes_written , log->logline);
-	client->cache->bytes_written+=strlen(log->logline);
+	memcpy(noua_adresa + client->cache->bytes_written , log, sizeof(struct lmc_client_logline));
+	client->cache->bytes_written+=sizeof(struct lmc_client_logline);
+	client->cache->log_number++;
 	return 0;
 }
 
