@@ -119,6 +119,7 @@ lmc_init_server_os(void)
 int
 lmc_init_client_cache(struct lmc_cache *cache)
 {
+	
 	return 0;
 }
 
@@ -167,5 +168,6 @@ lmc_flush_os(struct lmc_client *client)
 int
 lmc_unsubscribe_os(struct lmc_client *client)
 {
+	
 	return 0;
 }

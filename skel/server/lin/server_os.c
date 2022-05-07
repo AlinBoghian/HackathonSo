@@ -40,7 +40,7 @@ lmc_client_function(SOCKET client_sock)
 	client = lmc_create_client(client_sock);
 
 	while (1) {
-		rc = lmc_get_command(client);
+		int rc = lmc_get_command(client);
 		if (rc == -1)
 			break;
 	}
