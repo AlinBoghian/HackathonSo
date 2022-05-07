@@ -1,0 +1,21 @@
+SRCDIR ?= ../skel
+CC=gcc
+CFLAGS = -fPIC -Wall -I$(SRCDIR)/include
+LDLIBS = $(SRCDIR)/liblmc.so
+
+.PHONY: build
+build: checker
+
+checker: checker.o $(LDLIBS)
+
+checker.o: checker.c
+
+$(LDLIBS):
+	@$(MAKE) -C $(SRCDIR) -f Makefile.lin $(foreach LIB,$(LDLIBS),$(notdir $(LIB)))
+
+run: build
+	@./checker
+
+.PHONY: clean
+clean:
+	rm -f *.o *.so checker

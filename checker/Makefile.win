@@ -1,0 +1,27 @@
+!IFNDEF SRCDIR
+SRCDIR= ..\skel
+!ENDIF
+CFLAGS = /nologo /W3 /EHsc /D_CRT_SECURE_NO_WARNINGS "-I$(SRCDIR)\include"
+CC = cl
+LIBS = $(SRCDIR)\liblmc.lib
+LINK = link
+
+build: checker.exe
+
+checker.exe: checker.obj $(LIBS)
+	@copy $(SRCDIR)\liblmc.dll .
+	$(LINK) /nologo /out:$@ $** $(LIBS)
+
+checker.obj: checker.c
+	$(CC) $(CFLAGS) /Fo$@ /c $**
+
+$(SRCDIR)\liblmc.lib: $(SRCDIR)\liblmc.dll
+
+$(SRCDIR)\liblmc.dll:
+	@cd $(SRCDIR) && $(MAKE) /F Makefile.win liblmc.dll
+
+run: build
+	@.\checker.exe
+
+clean:
+	del /Q /S *.obj *.dll checker.exe
