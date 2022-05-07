@@ -116,7 +116,7 @@ lmc_send_log(struct lmc_conn *conn, char *logline)
 
 	op = lmc_get_op(LMC_ADD);
 	len = snprintf(buffer, sizeof(buffer),
-		"%s %s:%s", op->op_str, time, logline);
+		"%s %s>%s", op->op_str, time, logline);
 
 	if (lmc_send(conn->socket, buffer, len, 0) < 0) {
 		fprintf(stderr, "Error while adding logline to lmcd\n");

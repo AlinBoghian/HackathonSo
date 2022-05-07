@@ -123,6 +123,7 @@ found:
 static int
 lmc_disconnect_client(struct lmc_client *client)
 {
+	
 	return 0;
 }
 
@@ -138,9 +139,22 @@ lmc_disconnect_client(struct lmc_client *client)
 static int
 lmc_unsubscribe_client(struct lmc_client *client)
 {
-	return 0;
+	int i;
+	for (i = 0; i < lmc_cache_count; i++) {
+		if (lmc_caches[i] == NULL)
+			continue;
+		if (lmc_caches[i]->service_name == NULL)
+			continue;
+		if (strcmp(lmc_caches[i]->service_name, client->cache->service_name) == 0) {
+			lmc_caches[i] = lmc_caches[lmc_cache_count - 1];
+			lmc_caches[lmc_cache_count - 1] = NULL;
+			goto found;
+		}
+	}
+	return -1;
+found:
+	return lmc_unsubscribe_os(client);
 }
-
 /**
  * Add a log line to the client's cache.
  *
@@ -154,7 +168,7 @@ lmc_unsubscribe_client(struct lmc_client *client)
 static int
 lmc_add_log(struct lmc_client *client, struct lmc_client_logline *log)
 {
-	return 0;
+	return lmc_add_log_os(client, log);
 }
 
 /**
