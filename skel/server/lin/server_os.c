@@ -158,13 +158,14 @@ lmc_init_client_cache(struct lmc_cache *cache)
 int
 lmc_add_log_os(struct lmc_client *client, struct lmc_client_logline *log)
 {
+	printf("entering add_log");
+	printf("%s %s",log->time,log->logline);
 	int total_bytes = sizeof(struct lmc_client_logline)+client->cache->bytes_written;
 	int page_size = sysconf(_SC_PAGE_SIZE);
 	int pages_needed = total_bytes / page_size;
 	if(total_bytes % page_size != 0){
 		pages_needed++;
 	}
-
 
 	struct lmc_cache *cache = client->cache;
 	void *noua_adresa;

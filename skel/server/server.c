@@ -83,6 +83,7 @@ lmc_create_client(SOCKET client_sock)
 static int
 lmc_add_client(struct lmc_client *client, char *name)
 {
+	printf("client attempting connect with name: %s",name);
 	int err = 0;
 	size_t i;
 
@@ -108,6 +109,7 @@ lmc_add_client(struct lmc_client *client, char *name)
 
 	err = lmc_init_client_cache(client->cache);
 found:
+	printf("exiting add_client()");
 	return err;
 }
 
@@ -168,6 +170,7 @@ found:
 static int
 lmc_add_log(struct lmc_client *client, struct lmc_client_logline *log)
 {
+	printf("adding log");
 	return lmc_add_log_os(client, log);
 }
 
@@ -341,16 +344,18 @@ lmc_get_command(struct lmc_client *client)
 			goto end;
 		}
 	}
-
+	printf("op code %d\n",cmd.op->code);
 	switch (cmd.op->code) {
 	case LMC_CONNECT:
 	case LMC_SUBSCRIBE:
+		puts("about to call add_client");
 		err = lmc_add_client(client, cmd.data);
 		break;
 	case LMC_STAT:
 		err = lmc_send_stats(client);
 		break;
 	case LMC_ADD:
+		puts("case lmc_add");
 		/* TODO parse the client data and create a log line structure */
 		log = malloc(sizeof(struct lmc_client_logline));
 		memset(log,0,LMC_TIME_SIZE);
@@ -358,6 +363,7 @@ lmc_get_command(struct lmc_client *client)
 		int time_size = strchr(cmd.data, '>') - cmd.data;
 		memcpy(log->time,cmd.data,time_size);
 		strcpy(log->logline,cmd.data + time_size);
+		printf("about to call add log");
 		err = lmc_add_log(client, log);
 		break;
 	case LMC_FLUSH:
@@ -388,7 +394,7 @@ end:
 
 	if (cmd.data != NULL)
 		free(cmd.data);
-
+	puts("about to send response");
 	return lmc_send(client->client_sock, response, LMC_LINE_SIZE,
 			LMC_SEND_FLAGS);
 }
