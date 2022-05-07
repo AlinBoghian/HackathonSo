@@ -136,9 +136,11 @@ lmc_init_client_cache(struct lmc_cache *cache)
 
 	cache->ptr = mmap(NULL,cache->pages, PROT_READ | PROT_WRITE, 0, fd,0);
 	if(cache->ptr == MAP_FAILED){
+		printf("error nr is %d",errno);
 		perror("error mmap");
 		exit(-1);
 	}
+	
 	return 0;
 }
 
@@ -157,19 +159,17 @@ int
 lmc_add_log_os(struct lmc_client *client, struct lmc_client_logline *log)
 {
 	int total_bytes = sizeof(struct lmc_client_logline)+client->cache->bytes_written;
-	int pages_needed;
 	int page_size = sysconf(_SC_PAGE_SIZE);
-
-	pages_needed = pages_needed / page_size;
+	int pages_needed = total_bytes / page_size;
 	if(total_bytes % page_size != 0){
 		pages_needed++;
 	}
 
 
-	struct lmc_cache cache_scris;
+	struct lmc_cache *cache = client->cache;
 	void *noua_adresa;
 	if(pages_needed>client->cache->pages){
-		noua_adresa = mremap(client->cache->ptr, cache_scris.bytes_written, pages_needed, MREMAP_MAYMOVE);
+		noua_adresa = mremap(client->cache->ptr, cache->bytes_written  + sizeof(struct lmc_client_logline), pages_needed, MREMAP_MAYMOVE);
 	}
 	client->cache->ptr = noua_adresa;
 	memcpy(noua_adresa + client->cache->bytes_written , log, sizeof(struct lmc_client_logline));

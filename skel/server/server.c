@@ -398,7 +398,7 @@ int
 main(int argc, char *argv[])
 {
 	setbuf(stdout, NULL);
-
+	setvbuf(stdout, NULL, _IONBF,0);
 	if (argc == 1)
 		lmc_logfile_path = strdup("logs_lmc");
 	else
