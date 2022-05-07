@@ -36,6 +36,7 @@ struct lmc_cache {
 	char *service_name;
 	void *ptr;
 	size_t pages;
+	int log_number;
 	size_t bytes_written;
 };
 
