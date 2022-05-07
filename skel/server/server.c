@@ -202,8 +202,7 @@ static int
 lmc_send_stats(struct lmc_client *client)
 {
 	struct lmc_cache *cache = client->cache;
-	int bytes_sent = 0;
-	int KBs = cache->bytes_written / 1024;
+	long KBs = cache->bytes_written / 1024;
 	char time[LMC_TIME_SIZE];
 	char stats[LMC_STATUS_MAX_SIZE];
 
@@ -233,8 +232,8 @@ lmc_send_loglines(struct lmc_client *client)
 	char *buffer;
 	buffer = (char *) malloc(LMC_LINE_SIZE);
 	memset(buffer,0,LMC_LINE_SIZE);
-	buffer = client->cache->log_number;
-	struct lmc_client_logline *log_vect =(struct lmc_client_log *) client->cache->ptr;
+	(*buffer) = client->cache->log_number;
+	struct lmc_client_logline *log_vect =(struct lmc_client_logline *) client->cache->ptr;
 	lmc_send(client->client_sock, buffer, LMC_LINE_SIZE, 0);
 	for(int i = 0; i < client->cache->log_number; i++){
 		lmc_send(client->client_sock, log_vect+i, LMC_LINE_SIZE, 0);
@@ -353,7 +352,7 @@ lmc_get_command(struct lmc_client *client)
 		break;
 	case LMC_ADD:
 		/* TODO parse the client data and create a log line structure */
-		struct lmc_client_logline *log = malloc(sizeof(struct lmc_client_logline));
+		log = malloc(sizeof(struct lmc_client_logline));
 		memset(log,0,LMC_TIME_SIZE);
 		memset(log,0,LMC_LOGLINE_SIZE);
 		int time_size = strchr(cmd.data, '>') - cmd.data;

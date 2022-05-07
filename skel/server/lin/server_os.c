@@ -134,7 +134,7 @@ lmc_init_client_cache(struct lmc_cache *cache)
 	else
 		cache->pages = file_pages + LMC_PAGE_INCREMENT;
 
-	cache->ptr = mmap(NULL,cache->pages, PROT_READ | PROT_WRITE, 0, fd,0);
+	cache->ptr = mmap(NULL,cache->pages, PROT_READ | PROT_WRITE, MAP_PRIVATE, fd,0);
 	if(cache->ptr == MAP_FAILED){
 		printf("error nr is %d",errno);
 		perror("error mmap");
