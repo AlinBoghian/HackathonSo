@@ -209,7 +209,7 @@ lmc_send_stats(struct lmc_client *client)
 
 	lmc_crttime_to_str(time, LMC_TIME_SIZE, LMC_TIME_FORMAT);
 
-	snprintf(stats,LMC_STATUS_MAX_SIZE, LMC_STATS_FORMAT, time, KBs, cache->log_number);
+	snprintf(stats,LMC_STATUS_MAX_SIZE, LMC_STATS_FORMAT, time, KBs, cache->log_no);
 	int ret = lmc_send(client->client_sock, stats, LMC_LINE_SIZE,0);
 	if(ret < 0)
 		return -1;
