@@ -123,7 +123,8 @@ lmc_init_client_cache(struct lmc_cache *cache)
 		exit(-1);
 	}
 
-	file_size = lseek(fd,0,SEEK_SET);
+	file_size = lseek(fd,0,SEEK_END);
+	lseek(fd,0,SEEK_SET);
 	file_pages = ceil((double)file_size / (double)PAGE_SIZE);
 	if( file_pages < LMC_INIT_PAGENO * PAGE_SIZE)
 		cache->pages = LMC_INIT_PAGENO;
@@ -152,6 +153,16 @@ lmc_init_client_cache(struct lmc_cache *cache)
 int
 lmc_add_log_os(struct lmc_client *client, struct lmc_client_logline *log)
 {
+	int pages_needed = ceil((float)((strlen(log->logline)+client->cache->bytes_written)/sysconf(_SC_PAGE_SIZE)));
+	
+	struct lmc_cache cache_scris;
+	void *noua_adresa;
+	if(pages_needed>client->cache->pages){
+		noua_adresa = mremap(client->cache->ptr, cache_scris.bytes_written, pages_needed, MREMAP_MAYMOVE);
+	}
+	client->cache->ptr = noua_adresa;
+	strcpy(noua_adresa + client->cache->bytes_written , log->logline);
+	client->cache->bytes_written+=strlen(log->logline);
 	return 0;
 }
 
