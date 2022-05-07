@@ -17,7 +17,6 @@
 #include <arpa/inet.h>
 #include <errno.h>
 #include "../../include/server.h"
-#include <math.h>
 
 char *lmc_logfile_path;
 
@@ -111,6 +110,7 @@ lmc_init_server_os(void)
 int
 lmc_init_client_cache(struct lmc_cache *cache)
 {
+	int page_size = sysconf(_SC_PAGE_SIZE);
 	char *client_file = malloc(sizeof(char) * FILENAME_MAX);
 	sprintf(client_file,"%s/%s.log",lmc_logfile_path, cache->service_name);
 
@@ -125,8 +125,11 @@ lmc_init_client_cache(struct lmc_cache *cache)
 
 	file_size = lseek(fd,0,SEEK_END);
 	lseek(fd,0,SEEK_SET);
-	file_pages = ceil((double)file_size / (double)PAGE_SIZE);
-	if( file_pages < LMC_INIT_PAGENO * PAGE_SIZE)
+	file_pages = file_size / page_size;
+	if(file_size % page_size != 0){
+		file_pages++;
+	}
+	if( file_pages < LMC_INIT_PAGENO * page_size)
 		cache->pages = LMC_INIT_PAGENO;
 	else
 		cache->pages = file_pages + LMC_PAGE_INCREMENT;
@@ -153,8 +156,16 @@ lmc_init_client_cache(struct lmc_cache *cache)
 int
 lmc_add_log_os(struct lmc_client *client, struct lmc_client_logline *log)
 {
-	int pages_needed = ceil((float)((sizeof(struct lmc_client_logline)+client->cache->bytes_written)/sysconf(_SC_PAGE_SIZE)));
-	
+	int total_bytes = sizeof(struct lmc_client_logline)+client->cache->bytes_written;
+	int pages_needed;
+	int page_size = sysconf(_SC_PAGE_SIZE);
+
+	pages_needed = pages_needed / page_size;
+	if(total_bytes % page_size != 0){
+		pages_needed++;
+	}
+
+
 	struct lmc_cache cache_scris;
 	void *noua_adresa;
 	if(pages_needed>client->cache->pages){

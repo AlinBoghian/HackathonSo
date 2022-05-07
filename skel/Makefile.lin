@@ -1,6 +1,6 @@
 CC=gcc
 CFLAGS = -fPIC -Wall
-LDLIBS = -lpthread -pthread
+LDLIBS = -lpthread -pthread -lm
 
 .PHONY: build
 build: liblmc.so lmcd
