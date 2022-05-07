@@ -169,7 +169,7 @@ lmc_add_log(struct lmc_client *client, struct lmc_client_logline *log)
 static int
 lmc_flush(struct lmc_client *client)
 {
-	return 0;
+	return lmc_flush_os(client);
 }
 
 /**
@@ -187,6 +187,18 @@ lmc_flush(struct lmc_client *client)
 static int
 lmc_send_stats(struct lmc_client *client)
 {
+	struct lmc_cache *cache = client->cache;
+	int bytes_sent = 0;
+	int KBs = cache->bytes_written / 1024;
+	char time[LMC_TIME_SIZE];
+	char stats[LMC_STATUS_MAX_SIZE];
+
+	lmc_crttime_to_str(time, LMC_TIME_SIZE, LMC_TIME_FORMAT);
+
+	snprintf(stats,LMC_STATUS_MAX_SIZE, LMC_STATS_FORMAT, time, KBs, cache->log_no);
+	int ret = lmc_send(client->client_sock, stats, LMC_LINE_SIZE,0);
+	if(ret < 0)
+		return -1;
 	return 0;
 }
 
@@ -204,7 +216,7 @@ lmc_send_stats(struct lmc_client *client)
 static int
 lmc_send_loglines(struct lmc_client *client)
 {
-	return 0;
+
 }
 
 /**
@@ -318,7 +330,12 @@ lmc_get_command(struct lmc_client *client)
 		break;
 	case LMC_ADD:
 		/* TODO parse the client data and create a log line structure */
-		log = NULL;
+		struct lmc_client_logline *log = malloc(sizeof(struct lmc_client_logline));
+		memset(log,0,LMC_TIME_SIZE);
+		memset(log,0,LMC_LOGLINE_SIZE);
+		int time_size = strchr(cmd.data, '>') - cmd.data;
+		memcpy(log->time,cmd.data,time_size);
+		strcpy(log->logline,cmd.data + time_size);
 		err = lmc_add_log(client, log);
 		break;
 	case LMC_FLUSH:
